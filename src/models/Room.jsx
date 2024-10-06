@@ -6,15 +6,25 @@ import React, { useRef, useEffect } from "react";
 import { useGLTF, useAnimations } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 useFrame;
+import { OrbitControls } from "@react-three/drei";
 import room from "../../public/models/room.glb";
 import { a } from "@react-spring/three";
 
-const Room = (props) => {
-  const roomRef = useRef();
+const Room = (
+  isRotating,
+  setIsRotating,
+  setCurrentStage,
+  currentFocusPoint,
+  roomPosition,
+  ...props
+) => {
+  const group = useRef();
   const { nodes, materials, animations } = useGLTF(room);
   const { actions } = useAnimations(animations, group);
+  const centerPosition = [-1.5, 0, 3];
+
   return (
-    <a.group ref={roomRef} {...props}>
+    <a.group ref={group} position={centerPosition} {...props}>
       <group name="Scene">
         <mesh
           name="Table"
