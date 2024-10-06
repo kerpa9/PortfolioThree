@@ -1,10 +1,30 @@
-import React from "react";
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+
+import { Footer, Navbar } from "./components";
+import { About, Contact, Home } from "./pages";
 
 const App = () => {
   return (
-    <div>
-      <h1 className="text-red-500">Keven Reyes</h1>
-    </div>
+    <main className="bg-slate-300/20">
+      <Router>
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route
+            path="/*"
+            element={
+              <>
+                <Routes>
+                  <Route path="/about" element={<About />} />
+                  <Route path="/contact" element={<Contact />} />
+                </Routes>
+                <Footer />
+              </>
+            }
+          />
+        </Routes>
+      </Router>
+    </main>
   );
 };
 
