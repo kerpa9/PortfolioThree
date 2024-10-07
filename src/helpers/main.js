@@ -92,10 +92,6 @@ renderer.setPixelRatio(window.devicePixelRatio);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-// STATS
-// const stats = new Stats();
-// document.querySelector('.experience').appendChild(stats.dom);
-
 // CONTROLS
 const controls = new OrbitControls(camera, renderer.domElement);
 // controls.enableDamping = true;
@@ -268,33 +264,6 @@ scene.add(pointLight1);
 scene.add(pointLight2);
 scene.add(pointLight3);
 scene.add(pointLight4);
-
-// SETUP HELPERS
-// const axesHelper = new THREE.AxesHelper(5);
-// scene.add(axesHelper);
-// const gridHelper = new THREE.GridHelper(30, 30);
-// scene.add(gridHelper);
-// const shadowCameraHelper = new THREE.CameraHelper(roomLight.shadow.camera);
-// scene.add(shadowCameraHelper);
-// const pointLightHelper = new THREE.PointLightHelper(fanLight3, 0.03);
-// scene.add(pointLightHelper);
-
-// ADD GUI
-// const gui = new dat.GUI();
-// const options = {
-//   lightX: 0,
-//   lightY: 0.08,
-//   lightZ: 0,
-// };
-// gui.add(options, 'lightX').onChange((e) => {
-//   mobileLight.position.setX(e);
-// });
-// gui.add(options, 'lightY').onChange((e) => {
-//   mobileLight.position.setY(e);
-// });
-// gui.add(options, 'lightZ').onChange((e) => {
-//   mobileLight.position.setZ(e);
-// });
 
 const clock = new THREE.Clock();
 function animate() {
