@@ -1,10 +1,15 @@
+import { FontLoader } from "three/addons/loaders/FontLoader.js";
+import { OrbitControls } from "three/addons/controls/OrbitControls";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
+import { TextGeometry } from "three/addons/geometries/TextGeometry.js";
+import * as THREE from "three";
 import { useRef, useEffect } from "react";
 import { useGLTF } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
-useFrame;
 import room from "../../public/models/room.glb";
 import { a } from "@react-spring/three";
-
+import videoR from "../../public/textures/arcane1.mp4";
 const Room = (
   isRotating,
   setIsRotating,
@@ -13,18 +18,71 @@ const Room = (
   props
 ) => {
   const roomRef = useRef();
+  const videoRef = useRef(null);
+  const videoTextureRef = useRef(null);
   const { gl, viewport } = useThree();
   const { nodes, materials } = useGLTF(room);
   // const { actions } = useAnimations(animations, roomRef);
-  const roomPosition = [0.55, -0.1, 3];
+  const roomPosition = [-0.2, -0.4, 3];
   const lastX = useRef(0);
   const rotationSpeed = useRef(0);
   const dampingFactor = 0.95;
 
+  useEffect(() => {
+    // Ocultar el loader
+    // const loaderWrapper = document.getElementById("loaderWrapper");
+    // if (loaderWrapper) loaderWrapper.style.display = "none";
+
+    // Cargar el video
+    const video = document.createElement("video");
+    video.src = videoR;
+    video.muted = true;
+    video.playsInline = true;
+    video.autoplay = true;
+    video.loop = true;
+
+    // Crear textura de video
+    const videoTexture = new THREE.VideoTexture(video);
+    videoTexture.minFilter = THREE.NearestFilter;
+    videoTexture.magFilter = THREE.NearestFilter;
+    videoTexture.generateMipmaps = false;
+    videoTexture.encoding = THREE.sRGBEncoding;
+
+    // Aplicar la textura al monitor
+    if (videoRef.current) {
+      videoRef.current.material = new THREE.MeshBasicMaterial({
+        map: videoTexture,
+      });
+      video.play();
+    }
+
+    // Desactivar sombras para ciertos elementos
+    roomRef.current.children.forEach((child) => {
+      if (child.name !== "Wall") {
+        child.castShadow = true;
+      }
+      child.receiveShadow = true;
+
+      if (child.children) {
+        child.children.forEach((innerChild) => {
+          if (innerChild.name !== "Book001" && innerChild.name !== "Switch") {
+            innerChild.castShadow = true;
+          }
+          innerChild.receiveShadow = true;
+        });
+      }
+    });
+
+    return () => {
+      video.pause();
+      video.src = ""; // Liberar el recurso del video
+    };
+  }, []);
+
   const handlePointerDown = (event) => {
     event.stopPropagation();
     event.preventDefault();
-    setIsRotating(true);
+    setIsRotating(false);
 
     // Guarda la posición del mouse cuando se presiona
     const clientX = event.clientX || event.touches?.[0]?.clientX;
@@ -35,7 +93,7 @@ const Room = (
   const handlePointerUp = (event) => {
     event.stopPropagation();
     event.preventDefault();
-    setIsRotating(false);
+    setIsRotating(true);
   };
 
   // Handle pointer (mouse or touch) move event
@@ -164,6 +222,7 @@ const Room = (
        *     always stays within the range of 0 to 2 * Math.PI, which is equivalent to a full
        *     circle in radians.
        */
+
       const normalizedRotation =
         ((rotation % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
       switch (true) {
@@ -179,6 +238,16 @@ const Room = (
 
   useEffect(() => {
     if (roomRef.current) {
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(
+        75,
+        window.innerWidth / window.innerHeight,
+        0.01,
+        1000
+      );
+
+      loadIntroText();
+
       // Cambiar el color de los altavoces
       const speakerR = roomRef.current.getObjectByName("Speaker-R");
       const speakerL = roomRef.current.getObjectByName("Speaker-L");
@@ -188,15 +257,15 @@ const Room = (
         speakerR.material.color.set("#FFff"); // Cambia a rojo
       }
       if (CPU) {
-        // child.children[0].material = new THREE.MeshPhysicalMaterial();
-        CPU.material.roughness = 0;
-        CPU.material.color.set(0x999999);
-        CPU.material.ior = 3;
-        CPU.material.transmission = 2;
-        CPU.material.opacity = 0.8;
-        CPU.material.depthWrite = false;
-        CPU.material.depthTest = false;
-        // CPU.material = new THREE.MeshPhysicalMaterial();
+        CPU.material[0] = new THREE.MeshPhysicalMaterial();
+        CPU.material[0].roughness = 0;
+        CPU.material[0].color.set(0x999999);
+        CPU.material[0].ior = 3;
+        CPU.material[0].transmission = 2;
+        CPU.material[0].opacity = 0.8;
+        CPU.material[0].depthWrite = false;
+        CPU.material[0].depthTest = false;
+        CPU.material[0] = new THREE.MeshPhysicalMaterial();
         CPU.material.roughness = 0;
         CPU.material.color.set(0x999999);
         CPU.material.ior = 3;
@@ -207,8 +276,88 @@ const Room = (
         CPU.material.color.set("#FFFF"); // Cambia a verde
       }
       if (speakerL) {
-        speakerL.material.color.set("#FFFF"); // Cambia a verde
+        speakerL.material.color.set("#1111"); // Cambia a verde
       }
+
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+      scene.add(ambientLight);
+      const roomLight = new THREE.PointLight(0xffffff, 2.5, 10);
+      roomLight.position.set(0.3, 2, 0.5);
+      roomLight.castShadow = true;
+      roomLight.shadow.radius = 5;
+      roomLight.shadow.mapSize.width = 2048;
+      roomLight.shadow.mapSize.height = 2048;
+      roomLight.shadow.camera.far = 2.5;
+      // roomLight.shadow.camera.fov = 100;
+      roomLight.shadow.bias = -0.002;
+      scene.add(roomLight);
+      // add light for pc fans
+      const fanLight1 = new THREE.PointLight(0xff0000, 30, 0.2);
+      const fanLight2 = new THREE.PointLight(0x00ff00, 30, 0.12);
+      const fanLight3 = new THREE.PointLight(0x00ff00, 30, 0.2);
+      const fanLight4 = new THREE.PointLight(0x00ff00, 30, 0.2);
+      const fanLight5 = new THREE.PointLight(0x00ff00, 30, 0.05);
+      fanLight1.position.set(0, 0.29, -0.29);
+      fanLight2.position.set(-0.15, 0.29, -0.29);
+      fanLight3.position.set(0.21, 0.29, -0.29);
+      fanLight4.position.set(0.21, 0.19, -0.29);
+      fanLight5.position.set(0.21, 0.08, -0.29);
+      scene.add(fanLight1);
+      scene.add(fanLight2);
+      scene.add(fanLight3);
+      scene.add(fanLight4);
+      scene.add(fanLight5);
+      // add point light for text on wall
+      const pointLight1 = new THREE.PointLight(0xff0000, 0, 1.1);
+      const pointLight2 = new THREE.PointLight(0xff0000, 0, 1.1);
+      const pointLight3 = new THREE.PointLight(0xff0000, 0, 1.1);
+      const pointLight4 = new THREE.PointLight(0xff0000, 0, 1.1);
+      pointLight1.position.set(-0.2, 0.6, 0.24);
+      pointLight2.position.set(-0.2, 0.6, 0.42);
+      pointLight3.position.set(-0.2, 0.6, 0.01);
+      pointLight4.position.set(-0.2, 0.6, -0.14);
+      scene.add(pointLight1);
+      scene.add(pointLight2);
+      scene.add(pointLight3);
+      scene.add(pointLight4);
+    }
+
+    function loadIntroText() {
+      const loader = new FontLoader();
+      loader.load("fonts/unione.json", function (font) {
+        const textMaterials = [
+          new THREE.MeshPhongMaterial({ color: 0x171f27, flatShading: true }),
+          new THREE.MeshPhongMaterial({ color: 0xffffff }),
+        ];
+        const titleGeo = new TextGeometry("Keven Reyes", {
+          font: font,
+          size: 0.08,
+          height: 0.01,
+        });
+        titleText = new THREE.Mesh(titleGeo, textMaterials);
+        titleText.rotation.y = Math.PI * 0.5;
+        titleText.position.set(-0.27, 0.55, 0.5);
+        scene.add(titleText);
+      });
+
+      loader.load("fonts/helvatica.json", function (font) {
+        const textMaterials = [
+          new THREE.MeshPhongMaterial({ color: 0x171f27, flatShading: true }),
+          new THREE.MeshPhongMaterial({ color: 0xffffff }),
+        ];
+        const subTitleGeo = new TextGeometry(
+          "Electronic Engineer / Software Developer ",
+          {
+            font: font,
+            size: 0.018,
+            height: 0,
+          }
+        );
+        subtitleText = new THREE.Mesh(subTitleGeo, textMaterials);
+        subtitleText.rotation.y = Math.PI * 0.5;
+        subtitleText.position.set(-0.255, 0.5, 0.5);
+        scene.add(subtitleText);
+      });
     }
   }, [roomRef]);
 
@@ -228,6 +377,7 @@ const Room = (
           position={[-0.059, 0.054, 0.168]}
         >
           <mesh
+            ref={videoRef}
             name="Monitor"
             geometry={nodes.Monitor.geometry}
             material={materials.Screen}

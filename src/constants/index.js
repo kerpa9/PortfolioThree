@@ -1,4 +1,5 @@
 import { meta, shopify, starbucks, tesla } from "../assets/images";
+// import salesforce from "../assets/icons/salesforce.svg";
 import {
   car,
   contact,
@@ -19,6 +20,7 @@ import {
   react,
   redux,
   sass,
+  salesforce,
   snapgram,
   summiz,
   tailwindcss,
@@ -87,16 +89,15 @@ export const skills = [
 
 export const experiences = [
   {
-    title: "React.js Developer",
-    company_name: "Starbucks",
-    icon: starbucks,
+    title: "Ingytelcom",
+    company_name: "Support Engineer and CRM Manager",
+    icon: salesforce,
     iconBg: "#accbe1",
-    date: "March 2020 - April 2021",
+    date: "August 2023 - April 2024",
     points: [
-      "Developing and maintaining web applications using React.js and other related technologies.",
-      "Collaborating with cross-functional teams including designers, product managers, and other developers to create high-quality products.",
-      "Implementing responsive design and ensuring cross-browser compatibility.",
-      "Participating in code reviews and providing constructive feedback to other developers.",
+      "Support for the telecommunications sector, carrying out various tasks, among which the management and resolution of issues in cloud environments stands out, based on technical documentation and established procedures.",
+      "Efficient management of operations, taking into account Service Level Agreements (SLAs), through the use of various monitoring tools to ensure the performance and availability of services.",
+      "Generation of effective communication with the client, based on the efficient management of each request and the documentation produced through Salesforce, ensuring proper tracking of business processes.",
     ],
   },
   {
