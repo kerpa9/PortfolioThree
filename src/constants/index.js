@@ -26,6 +26,11 @@ import {
   tailwindcss,
   threads,
   typescript,
+  java,
+  spring,
+  database,
+  shark,
+  pokemon,
 } from "../assets/icons";
 
 export const skills = [
@@ -85,12 +90,27 @@ export const skills = [
     name: "TypeScript",
     type: "Frontend",
   },
+  {
+    imageUrl: java,
+    name: "Java",
+    type: "Backend",
+  },
+  {
+    imageUrl: spring,
+    name: "Spring Framework",
+    type: "Backend",
+  },
+  {
+    imageUrl: database,
+    name: "Database Oracle",
+    type: "Backend",
+  },
 ];
 
 export const experiences = [
   {
-    title: "Ingytelcom",
-    company_name: "Support Engineer and CRM Manager",
+    title: "Support Engineer and CRM Manager",
+    company_name: "Ingytelcom",
     icon: salesforce,
     iconBg: "#accbe1",
     date: "August 2023 - April 2024",
@@ -101,42 +121,26 @@ export const experiences = [
     ],
   },
   {
-    title: "React Native Developer",
-    company_name: "Tesla",
-    icon: tesla,
+    title: "Telecommunications Engineer",
+    company_name: "HD Comunicaciones",
+    icon: database,
     iconBg: "#fbc3bc",
-    date: "Jan 2021 - Feb 2022",
+    date: "April 2024 - Actuality",
     points: [
-      "Developing and maintaining web applications using React.js and other related technologies.",
-      "Collaborating with cross-functional teams including designers, product managers, and other developers to create high-quality products.",
-      "Implementing responsive design and ensuring cross-browser compatibility.",
-      "Participating in code reviews and providing constructive feedback to other developers.",
+      "Collaborative design with the company's work team of a plan in KMZ format for sectorization and identification of strategic points intended for the installation of nodes and NAP boxes, optimizing the network infrastructure.",
+      "Generation of effective communication with the client, based on the efficient management of each request and the documentation produced through Salesforce, ensuring proper tracking of business processes.",
     ],
   },
   {
-    title: "Web Developer",
-    company_name: "Shopify",
-    icon: shopify,
+    title: "Web Developer FullStack",
+    company_name: "Academy-Freelance",
+    icon: shark,
     iconBg: "#b7e4c7",
-    date: "Jan 2022 - Jan 2023",
+    date: "Actuality",
     points: [
-      "Developing and maintaining web applications using React.js and other related technologies.",
+      "Collaboration in the development of a website for an academic e-commerce model, as well as in the implementation of a text encryptor and other projects proposed by Academlo (academic institution) and Oracle Next Education, applying best practices in web development and ensuring the functionality and security of the applications.",
       "Collaborating with cross-functional teams including designers, product managers, and other developers to create high-quality products.",
-      "Implementing responsive design and ensuring cross-browser compatibility.",
-      "Participating in code reviews and providing constructive feedback to other developers.",
-    ],
-  },
-  {
-    title: "Full stack Developer",
-    company_name: "Meta",
-    icon: meta,
-    iconBg: "#a2d2ff",
-    date: "Jan 2023 - Present",
-    points: [
-      "Developing and maintaining web applications using React.js and other related technologies.",
-      "Collaborating with cross-functional teams including designers, product managers, and other developers to create high-quality products.",
-      "Implementing responsive design and ensuring cross-browser compatibility.",
-      "Participating in code reviews and providing constructive feedback to other developers.",
+      "Development of applications through API consumption, implementing asynchronous requests using React, which allows for smooth and efficient interaction with external services, enhancing the user experience and optimizing application performance.",
     ],
   },
 ];
@@ -161,17 +165,17 @@ export const socialLinks = [
 
 export const projects = [
   {
-    iconUrl: pricewise,
-    theme: "btn-back-red",
-    name: "Amazon Price Tracker",
+    iconUrl: pokemon,
+    theme: "btn-back-yellow",
+    name: "Pokedex Responsive",
     description:
-      "Developed a web application that tracks and notifies users of price changes for products on Amazon, helping users find the best deals.",
-    link: "https://github.com/adrianhajdin/pricewise",
+      "Create a web application for a Pokédex using React that consumes the PokeAPI. The application will allow users to search for Pokémon, view details such as types, statistics, and evolutions, all in a responsive and attractive interface. It will use React components and CSS styles to provide a smooth user experience.",
+    link: "https://pokedex09.netlify.app/",
   },
   {
     iconUrl: threads,
     theme: "btn-back-green",
-    name: "Full Stack Threads Clone",
+    name: "Backend",
     description:
       'Created a full-stack replica of the popular discussion platform "Threads," enabling users to post and engage in threaded conversations.',
     link: "https://github.com/adrianhajdin/threads",
