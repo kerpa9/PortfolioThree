@@ -1,5 +1,3 @@
-import { meta, shopify, starbucks, tesla } from "../assets/images";
-// import salesforce from "../assets/icons/salesforce.svg";
 import {
   car,
   contact,
@@ -31,18 +29,29 @@ import {
   database,
   shark,
   pokemon,
+  Astro,
 } from "../assets/icons";
 
 export const skills = [
+  {
+    imageUrl: html,
+    name: "HTML",
+    type: "Frontend",
+  },
   {
     imageUrl: css,
     name: "CSS",
     type: "Frontend",
   },
   {
-    imageUrl: express,
-    name: "Express",
-    type: "Backend",
+    imageUrl: javascript,
+    name: "JavaScript",
+    type: "Frontend",
+  },
+  {
+    imageUrl: typescript,
+    name: "TypeScript",
+    type: "Frontend",
   },
   {
     imageUrl: git,
@@ -53,22 +62,6 @@ export const skills = [
     imageUrl: github,
     name: "GitHub",
     type: "Version Control",
-  },
-  {
-    imageUrl: html,
-    name: "HTML",
-    type: "Frontend",
-  },
-  {
-    imageUrl: javascript,
-    name: "JavaScript",
-    type: "Frontend",
-  },
-
-  {
-    imageUrl: nodejs,
-    name: "Node.js",
-    type: "Backend",
   },
   {
     imageUrl: react,
@@ -86,10 +79,21 @@ export const skills = [
     type: "Frontend",
   },
   {
-    imageUrl: typescript,
-    name: "TypeScript",
+    imageUrl: Astro,
+    name: "React",
     type: "Frontend",
   },
+  {
+    imageUrl: nodejs,
+    name: "Node.js",
+    type: "Backend",
+  },
+  {
+    imageUrl: express,
+    name: "Express",
+    type: "Backend",
+  },
+
   {
     imageUrl: java,
     name: "Java",
@@ -172,44 +176,44 @@ export const projects = [
       "Create a web application for a Pokédex using React that consumes the PokeAPI. The application will allow users to search for Pokémon, view details such as types, statistics, and evolutions, all in a responsive and attractive interface. It will use React components and CSS styles to provide a smooth user experience.",
     link: "https://pokedex09.netlify.app/",
   },
-  {
-    iconUrl: threads,
-    theme: "btn-back-green",
-    name: "Backend",
-    description:
-      'Created a full-stack replica of the popular discussion platform "Threads," enabling users to post and engage in threaded conversations.',
-    link: "https://github.com/adrianhajdin/threads",
-  },
-  {
-    iconUrl: car,
-    theme: "btn-back-blue",
-    name: "Car Finding App",
-    description:
-      "Designed and built a mobile app for finding and comparing cars on the market, streamlining the car-buying process.",
-    link: "https://github.com/adrianhajdin/project_next13_car_showcase",
-  },
-  {
-    iconUrl: snapgram,
-    theme: "btn-back-pink",
-    name: "Full Stack Instagram Clone",
-    description:
-      "Built a complete clone of Instagram, allowing users to share photos and connect with friends in a familiar social media environment.",
-    link: "https://github.com/adrianhajdin/social_media_app",
-  },
-  {
-    iconUrl: estate,
-    theme: "btn-back-black",
-    name: "Real-Estate Application",
-    description:
-      "Developed a web application for real estate listings, facilitating property searches and connecting buyers with sellers.",
-    link: "https://github.com/adrianhajdin/projects_realestate",
-  },
-  {
-    iconUrl: summiz,
-    theme: "btn-back-yellow",
-    name: "AI Summarizer Application",
-    description:
-      "App that leverages AI to automatically generate concise & informative summaries from lengthy text content, or blogs.",
-    link: "https://github.com/adrianhajdin/project_ai_summarizer",
-  },
+  // {
+  //   iconUrl: threads,
+  //   theme: "btn-back-green",
+  //   name: "Backend",
+  //   description:
+  //     'Created a full-stack replica of the popular discussion platform "Threads," enabling users to post and engage in threaded conversations.',
+  //   link: "https://github.com/adrianhajdin/threads",
+  // },
+  // {
+  //   iconUrl: car,
+  //   theme: "btn-back-blue",
+  //   name: "Car Finding App",
+  //   description:
+  //     "Designed and built a mobile app for finding and comparing cars on the market, streamlining the car-buying process.",
+  //   link: "https://github.com/adrianhajdin/project_next13_car_showcase",
+  // },
+  // {
+  //   iconUrl: snapgram,
+  //   theme: "btn-back-pink",
+  //   name: "Full Stack Instagram Clone",
+  //   description:
+  //     "Built a complete clone of Instagram, allowing users to share photos and connect with friends in a familiar social media environment.",
+  //   link: "https://github.com/adrianhajdin/social_media_app",
+  // },
+  // {
+  //   iconUrl: estate,
+  //   theme: "btn-back-black",
+  //   name: "Real-Estate Application",
+  //   description:
+  //     "Developed a web application for real estate listings, facilitating property searches and connecting buyers with sellers.",
+  //   link: "https://github.com/adrianhajdin/projects_realestate",
+  // },
+  // {
+  //   iconUrl: summiz,
+  //   theme: "btn-back-yellow",
+  //   name: "AI Summarizer Application",
+  //   description:
+  //     "App that leverages AI to automatically generate concise & informative summaries from lengthy text content, or blogs.",
+  //   link: "https://github.com/adrianhajdin/project_ai_summarizer",
+  // },
 ];

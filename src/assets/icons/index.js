@@ -32,6 +32,7 @@ import spring from "./spring.svg";
 import database from "./database.svg";
 import shark from "./shark.svg";
 import pokemon from "./pokemon.svg";
+import Astro from "./Astro.svg";
 
 export {
   css,
@@ -68,4 +69,5 @@ export {
   database,
   shark,
   pokemon,
+  Astro,
 };

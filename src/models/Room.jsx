@@ -4,12 +4,18 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
 import { TextGeometry } from "three/addons/geometries/TextGeometry.js";
 import * as THREE from "three";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
+// import {} from "react-spring";
 import { useGLTF } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 import room from "../../public/models/room.glb";
 import { a } from "@react-spring/three";
 import videoR from "../../public/textures/arcane1.mp4";
+import videoL from "../../public/textures/arcane2.mp4";
+// import unione from "../assets/fonts/unione.json";
+// import helvatica from "../assets/fonts/helvatica.json";
+// import { DirectionalLight, AmbientLight } from "three";
+
 const Room = (
   isRotating,
   setIsRotating,
@@ -19,36 +25,84 @@ const Room = (
 ) => {
   const roomRef = useRef();
   const videoRef = useRef(null);
-  const videoTextureRef = useRef(null);
   const { gl, viewport } = useThree();
   const { nodes, materials } = useGLTF(room);
   // const { actions } = useAnimations(animations, roomRef);
-  const roomPosition = [-0.2, -0.4, 3];
+  const roomPosition = [-0.01, -0.6, 3.6];
   const lastX = useRef(0);
   const rotationSpeed = useRef(0);
   const dampingFactor = 0.95;
+  const switchRef = useRef();
+
+  // Estado del tema
+
+  const { scene } = useThree();
+  const titleRef = useRef();
+  const subtitleRef = useRef();
 
   useEffect(() => {
-    // Ocultar el loader
-    // const loaderWrapper = document.getElementById("loaderWrapper");
-    // if (loaderWrapper) loaderWrapper.style.display = "none";
+    const loader = new FontLoader();
 
-    // Cargar el video
+    loader.load("fonts/unione.json", (font) => {
+      const textMaterials = [
+        new THREE.MeshPhongMaterial({ color: 0x171f27, flatShading: true }),
+        new THREE.MeshPhongMaterial({ color: 0xffffff }),
+      ];
+
+      const titleGeo = new TextGeometry("Keven Reyes", {
+        font: font,
+        size: 0.1, // Aumenta el tamaño
+        height: 0.01,
+      });
+
+      const titleMesh = new THREE.Mesh(titleGeo, textMaterials);
+      titleMesh.rotation.y = Math.PI * 0.5;
+      titleMesh.position.set(-0.35, 0.73, 0.5); // Ajusta las posiciones
+
+      if (titleRef.current) {
+        titleRef.current.add(titleMesh);
+      }
+    });
+
+    loader.load("fonts/helvatica.json", (font) => {
+      const textMaterials = [
+        new THREE.MeshPhongMaterial({ color: 0x171f27, flatShading: true }),
+        new THREE.MeshPhongMaterial({ color: 0xffffff }),
+      ];
+
+      const subTitleGeo = new TextGeometry(
+        "Electronic Engineer / Software Developer",
+        {
+          font: font,
+          size: 0.04, // Aumenta el tamaño
+          height: 0,
+        }
+      );
+
+      const subtitleMesh = new THREE.Mesh(subTitleGeo, textMaterials);
+      subtitleMesh.rotation.y = Math.PI * 0.5;
+      subtitleMesh.position.set(-0.2, 0.42, 0.51); // Ajusta las posiciones
+
+      if (subtitleRef.current) {
+        subtitleRef.current.add(subtitleMesh);
+      }
+    });
+  }, [scene]);
+
+  useEffect(() => {
     const video = document.createElement("video");
-    video.src = videoR;
+    video.src = videoR; // Asegúrate de que videoR esté definido
     video.muted = true;
     video.playsInline = true;
     video.autoplay = true;
     video.loop = true;
 
-    // Crear textura de video
     const videoTexture = new THREE.VideoTexture(video);
     videoTexture.minFilter = THREE.NearestFilter;
     videoTexture.magFilter = THREE.NearestFilter;
     videoTexture.generateMipmaps = false;
     videoTexture.encoding = THREE.sRGBEncoding;
 
-    // Aplicar la textura al monitor
     if (videoRef.current) {
       videoRef.current.material = new THREE.MeshBasicMaterial({
         map: videoTexture,
@@ -56,28 +110,11 @@ const Room = (
       video.play();
     }
 
-    // Desactivar sombras para ciertos elementos
-    roomRef.current.children.forEach((child) => {
-      if (child.name !== "Wall") {
-        child.castShadow = true;
-      }
-      child.receiveShadow = true;
-
-      if (child.children) {
-        child.children.forEach((innerChild) => {
-          if (innerChild.name !== "Book001" && innerChild.name !== "Switch") {
-            innerChild.castShadow = true;
-          }
-          innerChild.receiveShadow = true;
-        });
-      }
-    });
-
     return () => {
       video.pause();
-      video.src = ""; // Liberar el recurso del video
+      video.src = "";
     };
-  }, []);
+  }, [videoR]);
 
   const handlePointerDown = (event) => {
     event.stopPropagation();
@@ -172,7 +209,7 @@ const Room = (
     // Add event listeners for pointer and keyboard events
     const canvas = gl.domElement;
     canvas.addEventListener("pointerdown", handlePointerDown);
-    window.addEventListener("pointerup", handlePointerUp);
+    canvas.addEventListener("pointerup", handlePointerUp);
     canvas.addEventListener("pointermove", handlePointerMove);
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keyup", handleKeyUp);
@@ -183,7 +220,7 @@ const Room = (
     // Remove event listeners when component unmounts
     return () => {
       canvas.removeEventListener("pointerdown", handlePointerDown);
-      window.removeEventListener("pointerup", handlePointerUp);
+      canvas.removeEventListener("pointerup", handlePointerUp);
       canvas.removeEventListener("pointermove", handlePointerMove);
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
@@ -192,49 +229,6 @@ const Room = (
       canvas.removeEventListener("touchmove", handleTouchMove);
     };
   }, [gl, handlePointerDown, handlePointerUp, handlePointerMove]);
-
-  // This function is called on each frame update
-  useFrame(() => {
-    // If not rotating, apply damping to slow down the rotation (smoothly)
-    if (!isRotating) {
-      rotationSpeed.current *= dampingFactor;
-      if (Math.abs(rotationSpeed.current) < 0.001) {
-        rotationSpeed.current = 0;
-      }
-      roomRef.current.rotation.y += rotationSpeed.current;
-    } else {
-      // When rotating, determine the current stage based on room's orientation
-      const rotation = roomRef.current.rotation.y;
-
-      /**
-       * Normalize the rotation value to ensure it stays within the range [0, 2 * Math.PI].
-       * The goal is to ensure that the rotation value remains within a specific range to
-       * prevent potential issues with very large or negative rotation values.
-       *  Here's a step-by-step explanation of what this code does:
-       *  1. rotation % (2 * Math.PI) calculates the remainder of the rotation value when divided
-       *     by 2 * Math.PI. This essentially wraps the rotation value around once it reaches a
-       *     full circle (360 degrees) so that it stays within the range of 0 to 2 * Math.PI.
-       *  2. (rotation % (2 * Math.PI)) + 2 * Math.PI adds 2 * Math.PI to the result from step 1.
-       *     This is done to ensure that the value remains positive and within the range of
-       *     0 to 2 * Math.PI even if it was negative after the modulo operation in step 1.
-       *  3. Finally, ((rotation % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI) applies another
-       *     modulo operation to the value obtained in step 2. This step guarantees that the value
-       *     always stays within the range of 0 to 2 * Math.PI, which is equivalent to a full
-       *     circle in radians.
-       */
-
-      const normalizedRotation =
-        ((rotation % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
-      switch (true) {
-        case normalizedRotation >= 5.45 && normalizedRotation <= 5.85:
-          setCurrentStage(4);
-          break;
-        case normalizedRotation >= 0.85 && normalizedRotation <= 1.3:
-          setCurrentStage(3);
-          break;
-      }
-    }
-  });
 
   useEffect(() => {
     if (roomRef.current) {
@@ -245,8 +239,6 @@ const Room = (
         0.01,
         1000
       );
-
-      loadIntroText();
 
       // Cambiar el color de los altavoces
       const speakerR = roomRef.current.getObjectByName("Speaker-R");
@@ -321,44 +313,6 @@ const Room = (
       scene.add(pointLight3);
       scene.add(pointLight4);
     }
-
-    function loadIntroText() {
-      const loader = new FontLoader();
-      loader.load("fonts/unione.json", function (font) {
-        const textMaterials = [
-          new THREE.MeshPhongMaterial({ color: 0x171f27, flatShading: true }),
-          new THREE.MeshPhongMaterial({ color: 0xffffff }),
-        ];
-        const titleGeo = new TextGeometry("Keven Reyes", {
-          font: font,
-          size: 0.08,
-          height: 0.01,
-        });
-        titleText = new THREE.Mesh(titleGeo, textMaterials);
-        titleText.rotation.y = Math.PI * 0.5;
-        titleText.position.set(-0.27, 0.55, 0.5);
-        scene.add(titleText);
-      });
-
-      loader.load("fonts/helvatica.json", function (font) {
-        const textMaterials = [
-          new THREE.MeshPhongMaterial({ color: 0x171f27, flatShading: true }),
-          new THREE.MeshPhongMaterial({ color: 0xffffff }),
-        ];
-        const subTitleGeo = new TextGeometry(
-          "Electronic Engineer / Software Developer ",
-          {
-            font: font,
-            size: 0.018,
-            height: 0,
-          }
-        );
-        subtitleText = new THREE.Mesh(subTitleGeo, textMaterials);
-        subtitleText.rotation.y = Math.PI * 0.5;
-        subtitleText.position.set(-0.255, 0.5, 0.5);
-        scene.add(subtitleText);
-      });
-    }
   }, [roomRef]);
 
   return (
@@ -366,18 +320,21 @@ const Room = (
       <group name="Scene">
         <mesh
           name="Table"
+          ref={titleRef}
           geometry={nodes.Table.geometry}
           material={materials.Table}
           position={[0.073, -0.099, 0.13]}
         />
         <mesh
           name="Stand"
+          ref={subtitleRef}
           geometry={nodes.Stand.geometry}
           material={materials.Black}
           position={[-0.059, 0.054, 0.168]}
         >
           <mesh
             ref={videoRef}
+            // ref={titleRef}
             name="Monitor"
             geometry={nodes.Monitor.geometry}
             material={materials.Screen}
@@ -385,22 +342,23 @@ const Room = (
           />
           <mesh
             name="Pc"
+            // ref={titleRef}
             geometry={nodes.Pc.geometry}
-            material={materials.Black}
+            material={materials.Screen}
             position={[0.022, 0.133, 0]}
           />
         </mesh>
         <mesh
           name="Speaker-R"
           geometry={nodes["Speaker-R"].geometry}
-          material={materials.Black}
+          material={materials.Coffe}
           position={[-0.136, 0.054, 0.026]}
           scale={[1, 1, 1.186]}
         />
         <mesh
           name="Speaker-L"
           geometry={nodes["Speaker-L"].geometry}
-          material={materials.Black}
+          material={materials.Coffe}
           position={[-0.136, 0.054, 0.312]}
           scale={[1, 1, 1.186]}
         />
@@ -461,7 +419,7 @@ const Room = (
           name="Mouse"
           castShadow
           geometry={nodes.Mouse.geometry}
-          material={materials.Black}
+          material={materials.Coffe}
           position={[0.095, 0.025, -0.031]}
         />
         <mesh
@@ -483,14 +441,14 @@ const Room = (
           name="Keyboard"
           castShadow
           geometry={nodes.Keyboard.geometry}
-          material={materials.Black}
+          material={materials.Coffe}
           position={[0.084, 0.03, 0.237]}
         />
         <mesh
           name="Glass"
           castShadow
           geometry={nodes.Glass.geometry}
-          material={materials.Glass}
+          material={materials.Black}
           position={[-0.193, 0.048, 0.508]}
         />
         <mesh
@@ -504,11 +462,12 @@ const Room = (
             name="CPU_Glass"
             castShadow
             geometry={nodes.CPU_Glass.geometry}
-            material={nodes.CPU_Glass.material}
+            material={materials.Glass}
             position={[0.206, 0.069, -0.007]}
           />
           <mesh
             name="CPU_Glass001"
+            // ref={videoRef}
             castShadow
             geometry={nodes.CPU_Glass001.geometry}
             material={nodes.CPU_Glass001.material}
@@ -518,21 +477,21 @@ const Room = (
             name="CPU_Part001"
             castShadow
             geometry={nodes.CPU_Part001.geometry}
-            material={materials.Black}
+            material={materials.Coffe}
             position={[-0.103, 0.061, -0.033]}
           />
           <mesh
             name="CPU_Part002"
             castShadow
             geometry={nodes.CPU_Part002.geometry}
-            material={materials.Metal}
+            material={materials.Glass}
             position={[-0.116, 0.07, -0.011]}
           />
           <mesh
             name="CPU_Part003"
             castShadow
             geometry={nodes.CPU_Part003.geometry}
-            material={materials["Top Metal"]}
+            material={materials["Red Glow"]}
             position={[-0.103, 0.079, -0.033]}
           />
           <mesh
@@ -553,14 +512,14 @@ const Room = (
             name="Fan"
             castShadow
             geometry={nodes.Fan.geometry}
-            material={materials.Black}
+            material={materials.Screen}
             position={[-0.203, 0.171, -0.009]}
           >
             <mesh
               name="CPU009"
               castShadow
               geometry={nodes.CPU009.geometry}
-              material={materials.Light}
+              material={materials.Glass}
               position={[0.011, 0, 0]}
             />
             <mesh
@@ -582,7 +541,7 @@ const Room = (
               name="CPU012"
               castShadow
               geometry={nodes.CPU012.geometry}
-              material={materials.Black}
+              material={materials["Red Glow"]}
               position={[0.009, 0, 0]}
             />
             <mesh
@@ -604,7 +563,7 @@ const Room = (
               name="CPU015"
               castShadow
               geometry={nodes.CPU015.geometry}
-              material={materials.Black}
+              material={materials.Screen}
               position={[0.009, 0, 0]}
             />
             <mesh
@@ -671,12 +630,13 @@ const Room = (
             name="Coffe_Liquid"
             castShadow
             geometry={nodes.Coffe_Liquid.geometry}
-            material={materials.Coffe}
+            material={materials.Black}
             position={[-0.005, 0.011, 0.004]}
           />
         </mesh>
         <mesh
           name="Book"
+          // ref={titleRef}
           castShadow
           geometry={nodes.Book.geometry}
           material={nodes.Book.material}
@@ -686,29 +646,33 @@ const Room = (
             name="Book001"
             castShadow
             geometry={nodes.Book001.geometry}
-            material={materials.Book}
+            material={materials.Black}
             position={[0, 0.007, 0.082]}
           />
         </mesh>
         <mesh
+          // ref={subtitleRef}
           name="Wall"
           castShadow
           geometry={nodes.Wall.geometry}
-          material={materials.Wall}
+          material={materials.Screen}
           position={[3.376, 1.53, 2.451]}
         />
+
         <mesh
+          ref={switchRef}
           name="SwitchBoard"
           castShadow
           geometry={nodes.SwitchBoard.geometry}
-          material={materials.Table}
+          material={materials.Black}
           position={[-0.271, 0.544, -0.455]}
         >
           <mesh
+            ref={switchRef}
             name="Switch"
             castShadow
             geometry={nodes.Switch.geometry}
-            material={materials.Table}
+            material={materials.Pink}
             position={[0.003, 0, 0]}
           />
         </mesh>
