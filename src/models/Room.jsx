@@ -11,11 +11,6 @@ import { useThree } from "@react-three/fiber";
 import room from "../../public/models/room.glb";
 import { a } from "@react-spring/three";
 import videoR from "../../public/textures/arcane1.mp4";
-// import videoL from "../../public/textures/arcane2.mp4";
-// import unione from "../assets/fonts/unione.json";
-// import helvatica from "../assets/fonts/helvatica.json";
-// import { DirectionalLight, AmbientLight } from "three";
-
 const Room = (
   isRotating,
   setIsRotating,
@@ -25,14 +20,12 @@ const Room = (
 ) => {
   const roomRef = useRef();
   const videoRef = useRef(null);
-  const { gl, viewport } = useThree();
+  const { gl, viewport, camera } = useThree();
   const { nodes, materials, animations } = useGLTF(room);
   // const { actions } = useAnimations(animations, roomRef);
   const roomPosition = [-0.01, -0.6, 3.6];
   const lastX = useRef(0);
   const rotationSpeed = useRef(0);
-  const dampingFactor = 0.95;
-  const switchRef = useRef();
 
   // Estado del tema
 
@@ -41,6 +34,44 @@ const Room = (
   const subtitleRef = useRef();
 
   const fanRefs = [useRef(), useRef(), useRef(), useRef(), useRef()];
+
+  const switchRef = useRef();
+  const raycaster = new THREE.Raycaster();
+  const mousePosition = new THREE.Vector2();
+
+  const handleSwitchClick = () => {
+    if (switchRef.current) {
+      const newPosition = new THREE.Vector3(
+        Math.random() * 2 - 1,
+        Math.random() * 2 - 1,
+        Math.random() * 2 - 1
+      );
+      switchRef.current.position.set(
+        newPosition.x,
+        newPosition.y,
+        newPosition.z
+      );
+    }
+  };
+
+  const onDocumentMouseClick = (e) => {
+    mousePosition.x = (e.clientX / window.innerWidth) * 2 - 1;
+    mousePosition.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+    raycaster.setFromCamera(mousePosition, camera);
+    const intersects = raycaster.intersectObjects(scene.children);
+
+    intersects.forEach((intersect) => {
+      if (intersect.object.name === "Switch") {
+        handleSwitchClick();
+      }
+    });
+  };
+
+  useEffect(() => {
+    window.addEventListener("click", onDocumentMouseClick);
+    return () => window.removeEventListener("click", onDocumentMouseClick);
+  }, [scene, camera]);
 
   useEffect(() => {
     if (!animations) return;
@@ -65,7 +96,6 @@ const Room = (
         const action = mixer.clipAction(clip);
         action.play();
 
-        // Debugging animation state
         console.log(`Playing animation: ${clipName}`, action);
       }
     });
@@ -316,48 +346,6 @@ const Room = (
       if (speakerL) {
         speakerL.material.color.set("#1111"); // Cambia a verde
       }
-
-      const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-      scene.add(ambientLight);
-      const roomLight = new THREE.PointLight(0xffffff, 2.5, 10);
-      roomLight.position.set(0.3, 2, 0.5);
-      roomLight.castShadow = true;
-      roomLight.shadow.radius = 5;
-      roomLight.shadow.mapSize.width = 2048;
-      roomLight.shadow.mapSize.height = 2048;
-      roomLight.shadow.camera.far = 2.5;
-      // roomLight.shadow.camera.fov = 100;
-      roomLight.shadow.bias = -0.002;
-      scene.add(roomLight);
-      // add light for pc fans
-      const fanLight1 = new THREE.PointLight(0xff0000, 30, 0.2);
-      const fanLight2 = new THREE.PointLight(0x00ff00, 30, 0.12);
-      const fanLight3 = new THREE.PointLight(0x00ff00, 30, 0.2);
-      const fanLight4 = new THREE.PointLight(0x00ff00, 30, 0.2);
-      const fanLight5 = new THREE.PointLight(0x00ff00, 30, 0.05);
-      fanLight1.position.set(0, 0.29, -0.29);
-      fanLight2.position.set(-0.15, 0.29, -0.29);
-      fanLight3.position.set(0.21, 0.29, -0.29);
-      fanLight4.position.set(0.21, 0.19, -0.29);
-      fanLight5.position.set(0.21, 0.08, -0.29);
-      scene.add(fanLight1);
-      scene.add(fanLight2);
-      scene.add(fanLight3);
-      scene.add(fanLight4);
-      scene.add(fanLight5);
-      // add point light for text on wall
-      const pointLight1 = new THREE.PointLight(0xff0000, 0, 1.1);
-      const pointLight2 = new THREE.PointLight(0xff0000, 0, 1.1);
-      const pointLight3 = new THREE.PointLight(0xff0000, 0, 1.1);
-      const pointLight4 = new THREE.PointLight(0xff0000, 0, 1.1);
-      pointLight1.position.set(-0.2, 0.6, 0.24);
-      pointLight2.position.set(-0.2, 0.6, 0.42);
-      pointLight3.position.set(-0.2, 0.6, 0.01);
-      pointLight4.position.set(-0.2, 0.6, -0.14);
-      scene.add(pointLight1);
-      scene.add(pointLight2);
-      scene.add(pointLight3);
-      scene.add(pointLight4);
     }
   }, [roomRef]);
 
@@ -368,7 +356,7 @@ const Room = (
           name="Table"
           ref={titleRef}
           geometry={nodes.Table.geometry}
-          material={materials.Table}
+          material={materials.Black}
           position={[0.073, -0.099, 0.13]}
         />
         <mesh
@@ -485,7 +473,7 @@ const Room = (
           name="Keyboard"
           castShadow
           geometry={nodes.Keyboard.geometry}
-          material={materials.Coffe}
+          material={materials.Screen}
           position={[0.084, 0.03, 0.237]}
         />
         <mesh
@@ -695,7 +683,7 @@ const Room = (
             name="Book001"
             castShadow
             geometry={nodes.Book001.geometry}
-            material={materials.Black}
+            material={materials["Red Glow"]}
             position={[0, 0.007, 0.082]}
           />
         </mesh>
@@ -703,7 +691,7 @@ const Room = (
           name="Wall"
           castShadow
           geometry={nodes.Wall.geometry}
-          material={materials.Screen}
+          material={materials.Plant}
           position={[3.376, 1.53, 2.451]}
         />
 
@@ -716,9 +704,10 @@ const Room = (
         >
           <mesh
             name="Switch"
+            ref={switchRef}
             castShadow
             geometry={nodes.Switch.geometry}
-            material={materials.Pink}
+            material={materials["Red Glow"]}
             position={[0.003, 0, 0]}
           />
         </mesh>
