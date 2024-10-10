@@ -1,17 +1,17 @@
 import { FontLoader } from "three/addons/loaders/FontLoader.js";
-import { OrbitControls } from "three/addons/controls/OrbitControls";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
+// import { OrbitControls } from "three/addons/controls/OrbitControls";
+// import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+// import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
 import { TextGeometry } from "three/addons/geometries/TextGeometry.js";
 import * as THREE from "three";
 import { useRef, useEffect, useState } from "react";
 // import {} from "react-spring";
 import { useGLTF } from "@react-three/drei";
-import { useFrame, useThree } from "@react-three/fiber";
+import { useThree } from "@react-three/fiber";
 import room from "../../public/models/room.glb";
 import { a } from "@react-spring/three";
 import videoR from "../../public/textures/arcane1.mp4";
-import videoL from "../../public/textures/arcane2.mp4";
+// import videoL from "../../public/textures/arcane2.mp4";
 // import unione from "../assets/fonts/unione.json";
 // import helvatica from "../assets/fonts/helvatica.json";
 // import { DirectionalLight, AmbientLight } from "three";
@@ -26,7 +26,7 @@ const Room = (
   const roomRef = useRef();
   const videoRef = useRef(null);
   const { gl, viewport } = useThree();
-  const { nodes, materials } = useGLTF(room);
+  const { nodes, materials, animations } = useGLTF(room);
   // const { actions } = useAnimations(animations, roomRef);
   const roomPosition = [-0.01, -0.6, 3.6];
   const lastX = useRef(0);
@@ -39,6 +39,52 @@ const Room = (
   const { scene } = useThree();
   const titleRef = useRef();
   const subtitleRef = useRef();
+
+  const fanRefs = [useRef(), useRef(), useRef(), useRef(), useRef()];
+
+  useEffect(() => {
+    if (!animations) return;
+
+    const clipNames = [
+      "fan_rotation",
+      "fan_rotation.001",
+      "fan_rotation.002",
+      "fan_rotation.003",
+      "fan_rotation.004",
+    ];
+
+    const mixers = [];
+    const clock = new THREE.Clock();
+
+    clipNames.forEach((clipName, index) => {
+      const clip = THREE.AnimationClip.findByName(animations, clipName);
+      if (clip && fanRefs[index].current) {
+        const mixer = new THREE.AnimationMixer(fanRefs[index].current);
+        mixers.push(mixer);
+
+        const action = mixer.clipAction(clip);
+        action.play();
+
+        // Debugging animation state
+        console.log(`Playing animation: ${clipName}`, action);
+      }
+    });
+
+    const animate = () => {
+      const delta = clock.getDelta();
+      mixers.forEach((mixer) => mixer.update(delta));
+      requestAnimationFrame(animate);
+    };
+
+    animate();
+
+    return () => {
+      mixers.forEach((mixer) => {
+        mixer.stopAllAction();
+        mixer.uncacheRoot(mixer.getRoot());
+      });
+    };
+  }, [animations, fanRefs]);
 
   useEffect(() => {
     const loader = new FontLoader();
@@ -334,7 +380,6 @@ const Room = (
         >
           <mesh
             ref={videoRef}
-            // ref={titleRef}
             name="Monitor"
             geometry={nodes.Monitor.geometry}
             material={materials.Screen}
@@ -342,9 +387,8 @@ const Room = (
           />
           <mesh
             name="Pc"
-            // ref={titleRef}
             geometry={nodes.Pc.geometry}
-            material={materials.Screen}
+            material={materials.Glass}
             position={[0.022, 0.133, 0]}
           />
         </mesh>
@@ -407,7 +451,7 @@ const Room = (
           <mesh
             name="Cylinder003"
             geometry={nodes.Cylinder003.geometry}
-            material={materials.Soil}
+            material={materials.Black}
           />
           <mesh
             name="Cylinder003_1"
@@ -462,12 +506,11 @@ const Room = (
             name="CPU_Glass"
             castShadow
             geometry={nodes.CPU_Glass.geometry}
-            material={materials.Glass}
+            material={materials.Black}
             position={[0.206, 0.069, -0.007]}
           />
           <mesh
             name="CPU_Glass001"
-            // ref={videoRef}
             castShadow
             geometry={nodes.CPU_Glass001.geometry}
             material={nodes.CPU_Glass001.material}
@@ -484,49 +527,51 @@ const Room = (
             name="CPU_Part002"
             castShadow
             geometry={nodes.CPU_Part002.geometry}
-            material={materials.Glass}
+            material={materials.Screen}
             position={[-0.116, 0.07, -0.011]}
           />
           <mesh
             name="CPU_Part003"
             castShadow
             geometry={nodes.CPU_Part003.geometry}
-            material={materials["Red Glow"]}
+            material={materials.Coffe}
             position={[-0.103, 0.079, -0.033]}
           />
           <mesh
             name="CPU_Part005"
             castShadow
             geometry={nodes.CPU_Part005.geometry}
-            material={materials["Top Metal"]}
+            material={materials.Glass}
             position={[-0.097, 0.152, 0.03]}
           />
           <mesh
             name="CPU_Part"
             castShadow
             geometry={nodes.CPU_Part.geometry}
-            material={materials.Black}
+            material={materials.Screen}
             position={[-0.074, -0.069, -0.022]}
           />
           <mesh
             name="Fan"
+            // ref={fanRefs[0]}
             castShadow
             geometry={nodes.Fan.geometry}
-            material={materials.Screen}
+            material={materials.Glass}
             position={[-0.203, 0.171, -0.009]}
           >
             <mesh
               name="CPU009"
               castShadow
               geometry={nodes.CPU009.geometry}
-              material={materials.Glass}
+              material={materials.Light}
               position={[0.011, 0, 0]}
             />
             <mesh
               name="CPU010"
+              ref={fanRefs[4]}
               castShadow
               geometry={nodes.CPU010.geometry}
-              material={materials.Black}
+              material={materials["Red Glow"]}
               position={[0.009, 0, 0]}
             />
           </mesh>
@@ -534,11 +579,12 @@ const Room = (
             name="Fan001"
             castShadow
             geometry={nodes.Fan001.geometry}
-            material={materials.Black}
+            material={materials.Glass}
             position={[0.183, 0.157, -0.009]}
           >
             <mesh
               name="CPU012"
+              ref={fanRefs[3]}
               castShadow
               geometry={nodes.CPU012.geometry}
               material={materials["Red Glow"]}
@@ -556,14 +602,15 @@ const Room = (
             name="Fan002"
             castShadow
             geometry={nodes.Fan002.geometry}
-            material={materials.Black}
+            material={materials.Glass}
             position={[0.183, 0.053, -0.009]}
           >
             <mesh
               name="CPU015"
+              ref={fanRefs[2]}
               castShadow
               geometry={nodes.CPU015.geometry}
-              material={materials.Screen}
+              material={materials["Red Glow"]}
               position={[0.009, 0, 0]}
             />
             <mesh
@@ -578,14 +625,15 @@ const Room = (
             name="Fan003"
             castShadow
             geometry={nodes.Fan003.geometry}
-            material={materials.Black}
+            material={materials.Glass}
             position={[0.183, -0.052, -0.009]}
           >
             <mesh
               name="CPU018"
+              ref={fanRefs[0]}
               castShadow
               geometry={nodes.CPU018.geometry}
-              material={materials.Black}
+              material={materials["Red Glow"]}
               position={[0.009, 0, 0]}
             />
             <mesh
@@ -600,21 +648,22 @@ const Room = (
             name="Fan004"
             castShadow
             geometry={nodes.Fan004.geometry}
-            material={materials.Black}
+            material={materials.Glass}
             position={[-0.05, 0.152, -0.025]}
           >
             <mesh
               name="CPU021"
+              ref={fanRefs[1]}
               castShadow
               geometry={nodes.CPU021.geometry}
-              material={materials.Black}
+              material={materials["Red Glow"]}
               position={[0.009, 0, 0]}
             />
             <mesh
               name="CPU022"
               castShadow
               geometry={nodes.CPU022.geometry}
-              material={materials["Red Glow"]}
+              material={materials.Light}
               position={[0.012, 0, 0]}
             />
           </mesh>
@@ -651,7 +700,6 @@ const Room = (
           />
         </mesh>
         <mesh
-          // ref={subtitleRef}
           name="Wall"
           castShadow
           geometry={nodes.Wall.geometry}
@@ -660,7 +708,6 @@ const Room = (
         />
 
         <mesh
-          ref={switchRef}
           name="SwitchBoard"
           castShadow
           geometry={nodes.SwitchBoard.geometry}
@@ -668,7 +715,6 @@ const Room = (
           position={[-0.271, 0.544, -0.455]}
         >
           <mesh
-            ref={switchRef}
             name="Switch"
             castShadow
             geometry={nodes.Switch.geometry}
